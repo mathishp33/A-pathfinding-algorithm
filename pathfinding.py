@@ -163,13 +163,14 @@ def reversing2(poss, fc, pos):
                         fposs = fc[pos.index(index)]
                         list1[0].append(fposs)
                         list1[1].append(poss2)
-        print(list1)
+        print('list : ', list1)
         list3 = sorted(list1[0])
         if len(list3) == 1: return list1[1][0]
         if len(list3) == 0:
             print('error line 167 list index out of range')
             return 'finished'
-        poss2 = pos[pos.index(list3[1])]
+        print('index : ', list1[1][list1[0].index(list3[0])])
+        poss2 = list1[1][list1[0].index(list3[0])]
         
         return poss2
                         
