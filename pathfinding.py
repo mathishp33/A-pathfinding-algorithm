@@ -132,7 +132,7 @@ def reversing(posse, fcl):
     fc.pop(pos.index(index))
     pos.pop(pos.index(index))
     poss = index
-    while math.sqrt((poss[0]-a[0])**2 + (poss[1]-a[1])**2) > D:
+    while poss != 'finished':
         time.sleep(0.05)
 
         pygame.draw.rect(surface, WHITE, pygame.Rect(poss[0]-D/2, poss[1]-D/2, D, D))
@@ -152,7 +152,7 @@ def reversing2(poss, fc, pos):
         poss2 = 0
         index = 0
         list1 = [[], []]
-        if math.sqrt((poss[0]-a[0])**2 + (poss[1]-a[1])**2) < D: return 'finished'
+        if math.sqrt((poss[0]-a[0])**2 + (poss[1]-a[1])**2) < 1.5*D: return 'finished'
         for i in range(1, -2, -1):
             for j in range(1, -2, -1):
                 if (poss[0]+i*D, poss[1]+j*D) in pos and not i == j == 0:
