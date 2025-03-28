@@ -16,6 +16,7 @@ class App():
         self.departure = None
         self.arrival = None
         self.path = []
+        self.final_path = []
         self.pos = None
 
         self.running = True
@@ -26,14 +27,15 @@ class App():
         self.departure = None
         self.arrival = None
         self.path = []
+        self.final_path = []
         self.pos = None
         self.clicks = (False, False, False)
         self.mouse_x, self.mouse_y = pg.mouse.get_pos()
     
     def pathfinding(self):
         self.pos = self.departure
-        grid = [(x, y, 0, 0) for x in range(0, self.WIDTH, 50) for y in range(0, self.HEIGHT, 50)]
         self.path = []
+        self.final_path = []
         while self.pos != self.arrival:
             self.path.append(self.check_surroundings())
             self.pos = self.path[-1]
@@ -41,10 +43,38 @@ class App():
                 print("No path found")
                 self.path.pop()
                 self.pos = self.path[-1]
-
         
+        self.pos = self.arrival
+        while self.pos != self.departure:
+            self.final_path.append(self.reversed_check_surroundings())
+            self.pos = self.final_path[-1]
+            if self.pos is None:
+                print("No path found")
+                self.final_path.pop()
+                self.pos = self.final_path[-1]
+
+    def reversed_check_surroundings(self):
+        best_cost = 10000
+        best_pos = None
+        for x in [-50, 0, 50]:
+            for y in [-50, 0, 50]:
+                if x == 0 and y == 0:
+                    continue
+                new_pos = (self.pos[0] + x, self.pos[1] + y)
+                if (new_pos not in self.path) or (new_pos in self.final_path):
+                    continue
+                g_cost = np.sqrt((new_pos[0] - self.departure[0])**2 + (new_pos[1] - self.departure[1])**2)
+                h_cost = np.sqrt((new_pos[0] - self.arrival[0])**2 + (new_pos[1] - self.arrival[1])**2)
+                f_cost = g_cost + h_cost
+                if g_cost < best_cost:
+                    best_cost = g_cost
+                    best_pos = new_pos
+        print("Best position:", best_pos)
+        print("Best cost:", best_cost)
+        return best_pos
+
     def check_surroundings(self):
-        best_f_cost = 100000
+        best_cost = 100000
         best_pos = None
         for x in [-50, 0, 50]:
             for y in [-50, 0, 50]:
@@ -53,19 +83,14 @@ class App():
                 new_pos = (self.pos[0] + x, self.pos[1] + y)
                 if new_pos in self.blocks or new_pos in self.path:
                     continue
-                if new_pos[0] < 0 or new_pos[0] > self.WIDTH or new_pos[1] < 0 or new_pos[1] > self.HEIGHT:
-                    continue
                 g_cost = np.sqrt((new_pos[0] - self.departure[0])**2 + (new_pos[1] - self.departure[1])**2)
                 h_cost = np.sqrt((new_pos[0] - self.arrival[0])**2 + (new_pos[1] - self.arrival[1])**2)
                 f_cost = g_cost + h_cost
-                if f_cost < best_f_cost:
-                    best_f_cost = f_cost
+                if f_cost < best_cost:
+                    best_cost = f_cost
                     best_pos = new_pos
 
-        if best_pos is not None:
-            return best_pos
-        else:
-            return None
+        return best_pos
 
 
 
@@ -76,15 +101,17 @@ class App():
         for x in np.arange(0, self.WIDTH, 50):
             pg.draw.line(self.screen, (50, 50, 50), (x, 0), (x, self.HEIGHT))
 
+        if self.phase == "pathfinding":
+            for pos in self.path:
+                pg.draw.rect(self.screen, (0, 0, 255), pg.Rect(pos[0], pos[1], 50, 50))
+            for pos in self.final_path:
+                pg.draw.rect(self.screen, (255, 255, 255), pg.Rect(pos[0], pos[1], 50, 50))
         for block in self.blocks:
             pg.draw.rect(self.screen, (0, 0, 0), pg.Rect(block[0], block[1], 50, 50))
         if self.departure is not None:
             pg.draw.rect(self.screen, (0, 255, 0), pg.Rect(self.departure[0], self.departure[1], 50, 50))
         if self.arrival is not None:
             pg.draw.rect(self.screen, (255, 0, 0), pg.Rect(self.arrival[0], self.arrival[1], 50, 50))
-        if self.phase == "pathfinding":
-            for pos in self.path:
-                pg.draw.rect(self.screen, (147, 112, 219), pg.Rect(pos[0], pos[1], 50, 50))
 
         if self.phase == "block placing":
             pg.draw.rect(self.screen, (20, 20, 20), pg.Rect(self.mouse_x + 20, self.mouse_y + 20, 10, 10))
