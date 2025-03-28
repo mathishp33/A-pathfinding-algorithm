@@ -1,3 +1,3 @@
-# A-pathfinding-algorithm
+# A*-pathfinding-algorithm
 
-A* pathfinding algorithm, you can place a start, an end and block that act as barrier.
+A python application that applies A* pathfinding algorithm to a grid where you can place a departure, an arrival and blocks.
