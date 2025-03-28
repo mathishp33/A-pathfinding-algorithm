@@ -69,8 +69,6 @@ class App():
                 if g_cost < best_cost:
                     best_cost = g_cost
                     best_pos = new_pos
-        print("Best position:", best_pos)
-        print("Best cost:", best_cost)
         return best_pos
 
     def check_surroundings(self):
