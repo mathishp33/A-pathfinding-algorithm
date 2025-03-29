@@ -40,9 +40,15 @@ class App():
             self.path.append(self.check_surroundings())
             self.pos = self.path[-1]
             if self.pos is None:
-                print("No path found")
-                self.path.pop()
-                self.pos = self.path[-1]
+                index = 0
+                while self.pos == None and self.pos != self.departure:
+                    self.pos = self.path[index]
+                    self.pos = self.check_surroundings()
+                    index += 1
+                    if index > len(self.path):
+                        print("No path found")
+                        return False
+                self.path.append(self.pos)
         
         self.pos = self.arrival
         while self.pos != self.departure:
@@ -54,7 +60,7 @@ class App():
                 self.pos = self.final_path[-1]
 
     def reversed_check_surroundings(self):
-        best_cost = 10000
+        best_cost = 100000
         best_pos = None
         for x in [-50, 0, 50]:
             for y in [-50, 0, 50]:
@@ -72,21 +78,20 @@ class App():
         return best_pos
 
     def check_surroundings(self):
-        best_cost = 100000
+        best_cost = 1000000
         best_pos = None
         for x in [-50, 0, 50]:
             for y in [-50, 0, 50]:
-                if x == 0 and y == 0:
-                    continue
-                new_pos = (self.pos[0] + x, self.pos[1] + y)
-                if new_pos in self.blocks or new_pos in self.path:
-                    continue
-                g_cost = np.sqrt((new_pos[0] - self.departure[0])**2 + (new_pos[1] - self.departure[1])**2)
-                h_cost = np.sqrt((new_pos[0] - self.arrival[0])**2 + (new_pos[1] - self.arrival[1])**2)
-                f_cost = g_cost + h_cost
-                if f_cost < best_cost:
-                    best_cost = f_cost
-                    best_pos = new_pos
+                if not (x == 0 and y == 0):
+                    new_pos = (self.pos[0] + x, self.pos[1] + y)
+                    if new_pos in self.blocks or new_pos in self.path:
+                        continue
+                    g_cost = np.sqrt((new_pos[0] - self.departure[0])**2 + (new_pos[1] - self.departure[1])**2)
+                    h_cost = np.sqrt((new_pos[0] - self.arrival[0])**2 + (new_pos[1] - self.arrival[1])**2)
+                    f_cost = g_cost + h_cost
+                    if f_cost < best_cost:
+                        best_cost = f_cost
+                        best_pos = new_pos
 
         return best_pos
 
@@ -101,9 +106,11 @@ class App():
 
         if self.phase == "pathfinding":
             for pos in self.path:
-                pg.draw.rect(self.screen, (0, 0, 255), pg.Rect(pos[0], pos[1], 50, 50))
+                if pos != None:
+                    pg.draw.rect(self.screen, (0, 0, 255), pg.Rect(pos[0], pos[1], 50, 50))
             for pos in self.final_path:
-                pg.draw.rect(self.screen, (255, 255, 255), pg.Rect(pos[0], pos[1], 50, 50))
+                if pos != None:
+                    pg.draw.rect(self.screen, (255, 255, 255), pg.Rect(pos[0], pos[1], 50, 50))
         for block in self.blocks:
             pg.draw.rect(self.screen, (0, 0, 0), pg.Rect(block[0], block[1], 50, 50))
         if self.departure is not None:
@@ -171,12 +178,12 @@ class App():
         self.clicks = pg.mouse.get_pressed()[0:3]
 
         if self.clicks[0]:
-            if self.phase == "block placing" and self.mouse_y > 100:
+            if self.phase == "block placing" and self.mouse_y > 50:
                 if (self.mouse_x // 50 * 50, self.mouse_y // 50 * 50) not in self.blocks:
                     self.blocks.append((self.mouse_x // 50 * 50, self.mouse_y // 50 * 50))
-            elif self.phase == "green placing" and self.mouse_y > 100:
+            elif self.phase == "green placing" and self.mouse_y > 50:
                 self.departure = (self.mouse_x // 50 * 50, self.mouse_y // 50 * 50)
-            elif self.phase == "red placing" and self.mouse_y > 100:
+            elif self.phase == "red placing" and self.mouse_y > 50:
                 self.arrival = (self.mouse_x // 50 * 50, self.mouse_y // 50 * 50)
         elif self.clicks[1]:
             pass
